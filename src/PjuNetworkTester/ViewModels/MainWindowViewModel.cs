@@ -21,6 +21,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly List<ScanDisplayRow> _currentDisplayRows = [];
     private AppLocalizer _localizer = new(AppLanguage.German);
     private CancellationTokenSource? _scanCancellation;
+    private CancellationTokenSource? _progressHideCancellation;
 
     public MainWindowViewModel()
     {
@@ -47,6 +48,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _scanProgressText = "0 %";
+
+    [ObservableProperty]
+    private bool _isScanProgressVisible;
 
     [ObservableProperty]
     private bool _showOfflineAddresses;
@@ -80,6 +84,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _currentDisplayRows.Clear();
         ScanProgressPercent = 0;
         ScanProgressText = "0 %";
+        ShowScanProgress();
         ExportCommand.NotifyCanExecuteChanged();
         _scanCancellation = new CancellationTokenSource();
 
@@ -120,6 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _scanCancellation?.Dispose();
             _scanCancellation = null;
             IsScanning = false;
+            ScheduleScanProgressHide();
             ExportCommand.NotifyCanExecuteChanged();
         }
     }
@@ -186,8 +192,48 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void UpdateScanProgress(ScanProgress progress)
     {
+        IsScanProgressVisible = true;
         ScanProgressPercent = progress.PercentComplete;
         ScanProgressText = $"{progress.PercentComplete} %";
+    }
+
+    private void ShowScanProgress()
+    {
+        _progressHideCancellation?.Cancel();
+        _progressHideCancellation = null;
+        IsScanProgressVisible = true;
+    }
+
+    private void ScheduleScanProgressHide()
+    {
+        _progressHideCancellation?.Cancel();
+        var hideCancellation = new CancellationTokenSource();
+        _progressHideCancellation = hideCancellation;
+        _ = HideScanProgressAfterDelayAsync(hideCancellation);
+    }
+
+    private async Task HideScanProgressAfterDelayAsync(CancellationTokenSource hideCancellation)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(20), hideCancellation.Token);
+            if (!hideCancellation.IsCancellationRequested && ReferenceEquals(_progressHideCancellation, hideCancellation))
+            {
+                IsScanProgressVisible = false;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            if (ReferenceEquals(_progressHideCancellation, hideCancellation))
+            {
+                _progressHideCancellation = null;
+            }
+
+            hideCancellation.Dispose();
+        }
     }
 
     private async Task LoadSettingsAsync()

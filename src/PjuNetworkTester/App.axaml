@@ -32,5 +32,11 @@
             <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="14,8" />
         </Style>
+        <Style Selector="ProgressBar.scan-progress">
+            <Setter Property="Background" Value="#1e293b" />
+            <Setter Property="Foreground" Value="#38bdf8" />
+            <Setter Property="MinHeight" Value="8" />
+            <Setter Property="CornerRadius" Value="999" />
+        </Style>
     </Application.Styles>
 </Application>

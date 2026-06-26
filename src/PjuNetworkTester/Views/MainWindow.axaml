@@ -44,8 +44,14 @@
                            Text="{Binding StatusText}"
                            Foreground="#38bdf8"
                            VerticalAlignment="Center" />
-                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" ColumnDefinitions="*,70" ColumnSpacing="12">
+                <Grid Grid.Row="2"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="4"
+                      ColumnDefinitions="*,70"
+                      ColumnSpacing="12"
+                      IsVisible="{Binding IsScanProgressVisible}">
                     <ProgressBar Grid.Column="0"
+                                 Classes="scan-progress"
                                  Minimum="0"
                                  Maximum="100"
                                  Value="{Binding ScanProgressPercent}"
