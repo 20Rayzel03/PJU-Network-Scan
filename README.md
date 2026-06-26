@@ -6,15 +6,15 @@
 
 Die App scannt IP-Bereiche, pingt Adressen an, versucht Hostnamen, MAC-Adressen und Herstellerinformationen zu ermitteln und zeigt die Ergebnisse in einer übersichtlichen Tabelle an.
 
-## Geplanter Funktionsumfang Version 1
+## Funktionsumfang Version 1
 
-- Windows Desktop-App mit `Setup.exe` Installer
+- Windows Desktop-App mit `Setup.exe` Installer-Grundlage
 - dunkles Dashboard-Design angelehnt an `home.jqpollag.de`
 - App-Name: **PJU Network Tester**
-- App-/Installer-Icon aus dem Webseiten-Favicon
+- App-/Installer-Icon aktuell vorbereitet, echtes Webseiten-Favicon folgt noch
 - Sprachen: Deutsch und Englisch
-- Sprachauswahl im Installer
-- Sprachwechsel in den App-Einstellungen
+- Sprachwechsel in der App
+- lokale Einstellungen als JSON-Datei
 - IP-Bereich-Eingabe über:
   - `10.1.5.0/24`
   - `10.1.5.1/24`
@@ -39,10 +39,42 @@ Die App scannt IP-Bereiche, pingt Adressen an, versucht Hostnamen, MAC-Adressen 
 
 Diese Funktionen können später ergänzt werden, bleiben aber zunächst draußen, damit Version 1 stabil und überschaubar bleibt.
 
-## Technischer Vorschlag
+## Technik
 
 - C# / .NET
 - Avalonia UI
 - Inno Setup für den Windows-Installer
 - lokale Einstellungen als JSON-Datei
 - keine externe Datenbank
+
+## Entwicklung
+
+Build und Tests:
+
+```bash
+dotnet build PJU-Network-Scan.slnx
+dotnet test PJU-Network-Scan.slnx
+```
+
+Windows-Publish:
+
+```bash
+./scripts/publish-windows.sh
+```
+
+Oder unter Windows:
+
+```powershell
+./scripts/publish-windows.ps1
+```
+
+Installer mit Inno Setup:
+
+```powershell
+./scripts/build-installer.ps1
+```
+
+Weitere Details:
+
+- [Implementierungsplan](docs/implementation-plan.md)
+- [Windows Publish und Installer](docs/windows-publish-installer.md)

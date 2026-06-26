@@ -2,8 +2,19 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\avalonia-logo.ico</ApplicationIcon>
+    <AssemblyName>PjuNetworkTester</AssemblyName>
+    <RootNamespace>PjuNetworkTester</RootNamespace>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <Product>PJU Network Tester</Product>
+    <Authors>Julius Pollag</Authors>
+    <Company>PJU</Company>
+    <Description>Windows network scanner for IP ranges, hostnames, MAC addresses, vendors, subnet summaries, and XLSX exports.</Description>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
