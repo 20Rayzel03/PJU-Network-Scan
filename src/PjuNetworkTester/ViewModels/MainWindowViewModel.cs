@@ -10,14 +10,28 @@ using CommunityToolkit.Mvvm.Input;
 using PjuNetworkTester.Core.Export;
 using PjuNetworkTester.Core.Networking;
 using PjuNetworkTester.Core.Scanning;
+using PjuNetworkTester.Core.Settings;
 
 namespace PjuNetworkTester.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly NetworkScanner _scanner = new();
+    private readonly AppSettingsStore _settingsStore = AppSettingsStore.CreateDefault();
     private readonly List<ScanDisplayRow> _currentDisplayRows = [];
+    private AppLocalizer _localizer = new(AppLanguage.German);
     private CancellationTokenSource? _scanCancellation;
+
+    public MainWindowViewModel()
+    {
+        LanguageOptions =
+        [
+            new LanguageOption(AppLanguage.German, "Deutsch"),
+            new LanguageOption(AppLanguage.English, "English")
+        ];
+        SelectedLanguage = LanguageOptions[0];
+        _ = LoadSettingsAsync();
+    }
 
     [ObservableProperty]
     private string _scanInput = "10.1.5.0/24";
@@ -30,6 +44,25 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _showOfflineAddresses;
+
+    [ObservableProperty]
+    private LanguageOption _selectedLanguage;
+
+    public IReadOnlyList<LanguageOption> LanguageOptions { get; }
+
+    public string AppTitle => _localizer.Translate(AppText.AppTitle);
+
+    public string RangePlaceholder => _localizer.Translate(AppText.RangePlaceholder);
+
+    public string StartScanText => _localizer.Translate(AppText.StartScan);
+
+    public string StopText => _localizer.Translate(AppText.Stop);
+
+    public string ExportExcelText => _localizer.Translate(AppText.ExportExcel);
+
+    public string ShowOfflineAddressesText => _localizer.Translate(AppText.ShowOfflineAddresses);
+
+    public string LanguageText => _localizer.Translate(AppText.Language);
 
     public ObservableCollection<ScanResultRowViewModel> Results { get; } = [];
 
@@ -44,9 +77,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
         try
         {
-            StatusText = "IP-Bereich wird geprüft ...";
+            StatusText = _localizer.Translate(AppText.CheckingRange);
             var range = IpRangeParser.Parse(ScanInput);
-            StatusText = $"Scan läuft: {range.Start} - {range.End} ({range.AddressCount} Adressen)";
+            StatusText = SelectedLanguage.Language == AppLanguage.English
+                ? $"Scan running: {range.Start} - {range.End} ({range.AddressCount} addresses)"
+                : $"Scan läuft: {range.Start} - {range.End} ({range.AddressCount} Adressen)";
 
             var scanResults = await _scanner.ScanAsync(range, ScanOptions.Default, _scanCancellation.Token);
             var displayRows = SubnetSummaryService.Summarize(range.Start, range.End, scanResults, ShowOfflineAddresses);
@@ -59,11 +94,13 @@ public partial class MainWindowViewModel : ViewModelBase
             }
 
             var onlineCount = scanResults.Count(result => result.IsOnline);
-            StatusText = $"Scan abgeschlossen. Online: {onlineCount}, angezeigte Zeilen: {Results.Count}";
+            StatusText = SelectedLanguage.Language == AppLanguage.English
+                ? $"Scan completed. Online: {onlineCount}, displayed rows: {Results.Count}"
+                : $"Scan abgeschlossen. Online: {onlineCount}, angezeigte Zeilen: {Results.Count}";
         }
         catch (OperationCanceledException)
         {
-            StatusText = "Scan abgebrochen.";
+            StatusText = SelectedLanguage.Language == AppLanguage.English ? "Scan cancelled." : "Scan abgebrochen.";
         }
         catch (FormatException exception)
         {
@@ -81,15 +118,26 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanExport))]
     private async Task ExportAsync()
     {
-        var exportDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "PJU Network Tester");
-        var exportPath = Path.Combine(
-            exportDirectory,
-            $"PJU-Network-Scan_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx");
+        try
+        {
+            var exportDirectory = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "PJU Network Tester");
+            var exportPath = Path.Combine(
+                exportDirectory,
+                $"PJU-Network-Scan_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx");
 
-        await XlsxExporter.ExportAsync(_currentDisplayRows, exportPath, CancellationToken.None);
-        StatusText = $"Excel-Export gespeichert: {exportPath}";
+            await XlsxExporter.ExportAsync(_currentDisplayRows, exportPath, CancellationToken.None);
+            StatusText = SelectedLanguage.Language == AppLanguage.English
+                ? $"Excel export saved: {exportPath}"
+                : $"Excel-Export gespeichert: {exportPath}";
+        }
+        catch (Exception exception)
+        {
+            StatusText = SelectedLanguage.Language == AppLanguage.English
+                ? $"Excel export failed: {exception.Message}"
+                : $"Excel-Export fehlgeschlagen: {exception.Message}";
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanStopScan))]
@@ -105,11 +153,71 @@ public partial class MainWindowViewModel : ViewModelBase
         ExportCommand.NotifyCanExecuteChanged();
     }
 
+    partial void OnSelectedLanguageChanged(LanguageOption value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        _localizer = new AppLocalizer(value.Language);
+        NotifyLocalizedPropertiesChanged();
+        if (StatusText is "Bereit." or "Ready.")
+        {
+            StatusText = _localizer.Translate(AppText.Ready);
+        }
+
+        _ = SaveSettingsAsync();
+    }
+
+    partial void OnShowOfflineAddressesChanged(bool value)
+    {
+        _ = SaveSettingsAsync();
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        try
+        {
+            var settings = await _settingsStore.LoadAsync(CancellationToken.None);
+            var language = LanguageOptions.FirstOrDefault(option => option.Language == settings.Language) ?? LanguageOptions[0];
+            SelectedLanguage = language;
+            ShowOfflineAddresses = settings.ShowOfflineAddresses;
+            StatusText = _localizer.Translate(AppText.Ready);
+        }
+        catch
+        {
+            StatusText = _localizer.Translate(AppText.Ready);
+        }
+    }
+
+    private Task SaveSettingsAsync()
+    {
+        var settings = new AppSettings(SelectedLanguage.Language, ShowOfflineAddresses);
+        return _settingsStore.SaveAsync(settings, CancellationToken.None);
+    }
+
+    private void NotifyLocalizedPropertiesChanged()
+    {
+        OnPropertyChanged(nameof(AppTitle));
+        OnPropertyChanged(nameof(RangePlaceholder));
+        OnPropertyChanged(nameof(StartScanText));
+        OnPropertyChanged(nameof(StopText));
+        OnPropertyChanged(nameof(ExportExcelText));
+        OnPropertyChanged(nameof(ShowOfflineAddressesText));
+        OnPropertyChanged(nameof(LanguageText));
+    }
+
     private bool CanStartScan() => !IsScanning;
 
     private bool CanStopScan() => IsScanning;
 
     private bool CanExport() => !IsScanning && _currentDisplayRows.Count > 0;
+}
+
+public sealed record LanguageOption(AppLanguage Language, string DisplayName)
+{
+    public override string ToString() => DisplayName;
 }
 
 public sealed class ScanResultRowViewModel

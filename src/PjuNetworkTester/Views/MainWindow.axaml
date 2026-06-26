@@ -7,7 +7,7 @@
         x:Class="PjuNetworkTester.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="PJU Network Tester"
+        Title="{Binding AppTitle}"
         Width="1100"
         Height="720"
         MinWidth="900"
@@ -19,26 +19,32 @@
 
     <Grid RowDefinitions="Auto,Auto,*" Margin="22" RowSpacing="16">
         <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Text="PJU Network Tester" FontSize="30" FontWeight="Bold" />
+            <TextBlock Text="{Binding AppTitle}" FontSize="30" FontWeight="Bold" />
             <TextBlock Text="IP-Bereiche scannen, Online-Geräte finden und nicht erreichbare /24-Netze zusammenfassen." Foreground="#94a3b8" />
         </StackPanel>
 
         <Border Grid.Row="1" Classes="card">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="12">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="12">
                 <TextBox Grid.Column="0"
-                         PlaceholderText="10.1.5.0/24 oder 10.1.2.1 - 10.1.25.255"
+                         PlaceholderText="{Binding RangePlaceholder}"
                          Text="{Binding ScanInput}" />
-                <Button Grid.Column="1" Content="Scan starten" Command="{Binding StartScanCommand}" />
-                <Button Grid.Column="2" Content="Stop" Command="{Binding StopScanCommand}" />
-                <Button Grid.Column="3" Content="Excel exportieren" Command="{Binding ExportCommand}" />
+                <Button Grid.Column="1" Content="{Binding StartScanText}" Command="{Binding StartScanCommand}" />
+                <Button Grid.Column="2" Content="{Binding StopText}" Command="{Binding StopScanCommand}" />
+                <Button Grid.Column="3" Content="{Binding ExportExcelText}" Command="{Binding ExportCommand}" />
 
                 <CheckBox Grid.Row="1" Grid.Column="0"
-                          Content="Offline-Adressen anzeigen"
+                          Content="{Binding ShowOfflineAddressesText}"
                           IsChecked="{Binding ShowOfflineAddresses}" />
                 <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
                            Text="{Binding StatusText}"
                            Foreground="#38bdf8"
                            VerticalAlignment="Center" />
+                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="{Binding LanguageText}" VerticalAlignment="Center" Foreground="#94a3b8" />
+                    <ComboBox ItemsSource="{Binding LanguageOptions}"
+                              SelectedItem="{Binding SelectedLanguage}"
+                              MinWidth="140" />
+                </StackPanel>
             </Grid>
         </Border>
 
