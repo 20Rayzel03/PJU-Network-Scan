@@ -3,18 +3,76 @@
         xmlns:vm="using:PjuNetworkTester.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="720"
         x:Class="PjuNetworkTester.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="PjuNetworkTester">
+        Title="PJU Network Tester"
+        Width="1100"
+        Height="720"
+        MinWidth="900"
+        MinHeight="560">
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid RowDefinitions="Auto,Auto,*" Margin="22" RowSpacing="16">
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock Text="PJU Network Tester" FontSize="30" FontWeight="Bold" />
+            <TextBlock Text="IP-Bereiche scannen, Online-Geräte finden und nicht erreichbare /24-Netze zusammenfassen." Foreground="#94a3b8" />
+        </StackPanel>
 
+        <Border Grid.Row="1" Classes="card">
+            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="12">
+                <TextBox Grid.Column="0"
+                         PlaceholderText="10.1.5.0/24 oder 10.1.2.1 - 10.1.25.255"
+                         Text="{Binding ScanInput}" />
+                <Button Grid.Column="1" Content="Scan starten" Command="{Binding StartScanCommand}" />
+                <Button Grid.Column="2" Content="Stop" Command="{Binding StopScanCommand}" />
+
+                <CheckBox Grid.Row="1" Grid.Column="0"
+                          Content="Offline-Adressen anzeigen"
+                          IsChecked="{Binding ShowOfflineAddresses}" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                           Text="{Binding StatusText}"
+                           Foreground="#38bdf8"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Classes="card" Padding="0">
+            <Grid RowDefinitions="Auto,*">
+                <Grid Grid.Row="0" ColumnDefinitions="70,170,220,170,170,90,*" Background="#020617" Height="42">
+                    <TextBlock Grid.Column="0" Text="Status" FontWeight="Bold" Margin="12,0" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="IP / Bereich" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="Hostname" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="MAC-Adresse" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="4" Text="Hersteller" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="5" Text="Ping" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="6" Text="Bemerkung" FontWeight="Bold" VerticalAlignment="Center" />
+                </Grid>
+
+                <ScrollViewer Grid.Row="1">
+                    <ItemsControl ItemsSource="{Binding Results}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ScanResultRowViewModel">
+                                <Border BorderBrush="#1f2937" BorderThickness="0,0,0,1" Padding="0,9">
+                                    <Grid ColumnDefinitions="70,170,220,170,170,90,*">
+                                        <TextBlock Grid.Column="0" Text="{Binding StatusIcon}" Margin="12,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding AddressOrRange}" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Hostname}" Foreground="#cbd5e1" />
+                                        <TextBlock Grid.Column="3" Text="{Binding MacAddress}" Foreground="#cbd5e1" />
+                                        <TextBlock Grid.Column="4" Text="{Binding Vendor}" Foreground="#cbd5e1" />
+                                        <TextBlock Grid.Column="5" Text="{Binding RoundtripTime}" Foreground="#cbd5e1" />
+                                        <TextBlock Grid.Column="6" Text="{Binding Note}" Foreground="#fbbf24" TextWrapping="Wrap" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

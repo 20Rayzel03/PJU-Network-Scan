@@ -2,14 +2,35 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="PjuNetworkTester.App"
              xmlns:local="using:PjuNetworkTester"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Dark">
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="Window">
+            <Setter Property="Background" Value="#0f172a" />
+        </Style>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#e5e7eb" />
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#111827" />
+            <Setter Property="BorderBrush" Value="#243244" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#020617" />
+            <Setter Property="Foreground" Value="#f8fafc" />
+            <Setter Property="BorderBrush" Value="#334155" />
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="14,8" />
+        </Style>
     </Application.Styles>
 </Application>
