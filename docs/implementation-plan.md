@@ -78,7 +78,7 @@ The scan input field must accept:
 - Create: `src/PjuNetworkTester/PjuNetworkTester.csproj`
 - Create: `src/PjuNetworkTester.Core/PjuNetworkTester.Core.csproj`
 - Create: `tests/PjuNetworkTester.Core.Tests/PjuNetworkTester.Core.Tests.csproj`
-- Create: `PJU-Network-Scan.sln`
+- Create: `PJU-Network-Scan.slnx`
 
 **Steps:**
 1. Install or verify .NET SDK availability.

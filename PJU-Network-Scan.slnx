@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PjuNetworkTester.Core/PjuNetworkTester.Core.csproj" />
+    <Project Path="src/PjuNetworkTester/PjuNetworkTester.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PjuNetworkTester.Core.Tests/PjuNetworkTester.Core.Tests.csproj" />
+  </Folder>
+</Solution>
