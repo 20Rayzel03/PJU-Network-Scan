@@ -47,33 +47,6 @@ Diese Funktionen können später ergänzt werden, bleiben aber zunächst drauße
 - lokale Einstellungen als JSON-Datei
 - keine externe Datenbank
 
-## Entwicklung
-
-Build und Tests:
-
-```bash
-dotnet build PJU-Network-Scan.slnx
-dotnet test PJU-Network-Scan.slnx
-```
-
-Windows-Publish:
-
-```bash
-./scripts/publish-windows.sh
-```
-
-Oder unter Windows:
-
-```powershell
-./scripts/publish-windows.ps1
-```
-
-Installer mit Inno Setup:
-
-```powershell
-./scripts/build-installer.ps1
-```
-
 Weitere Details:
 
 - [Implementierungsplan](docs/implementation-plan.md)
