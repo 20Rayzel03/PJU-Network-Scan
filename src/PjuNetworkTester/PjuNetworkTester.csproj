@@ -13,7 +13,7 @@
     <FileVersion>0.1.0.0</FileVersion>
     <Product>PJU Network Tester</Product>
     <Authors>Julius Pollag</Authors>
-    <Company>PJU</Company>
+    <Company>Julius Pollag</Company>
     <Description>Windows network scanner for IP ranges, hostnames, MAC addresses, vendors, subnet summaries, and XLSX exports.</Description>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>

@@ -1,6 +1,6 @@
 #define MyAppName "PJU Network Tester"
 #define MyAppVersion "0.1.0"
-#define MyAppPublisher "PJU"
+#define MyAppPublisher "Julius Pollag"
 #define MyAppExeName "PjuNetworkTester.exe"
 #define MyAppId "{{7C5F2D87-9A7F-48F5-AC2E-68026C74F0D4}"
 
@@ -9,6 +9,9 @@ AppId={#MyAppId}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
+AppPublisherURL=https://github.com/20Rayzel03/PJU-Network-Scan
+AppSupportURL=https://github.com/20Rayzel03/PJU-Network-Scan/issues
+AppUpdatesURL=https://github.com/20Rayzel03/PJU-Network-Scan/releases
 DefaultDirName={localappdata}\Programs\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
