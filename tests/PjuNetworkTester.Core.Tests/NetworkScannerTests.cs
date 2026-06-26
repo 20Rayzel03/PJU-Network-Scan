@@ -53,6 +53,30 @@ public sealed class NetworkScannerTests
     }
 
     [Fact]
+    public async Task ScanAsync_reports_progress_after_each_scanned_address()
+    {
+        var probe = new FakeNetworkProbe(new Dictionary<string, ProbeResult>
+        {
+            ["10.1.5.1"] = ProbeResult.Online(2, "router.local"),
+            ["10.1.5.2"] = ProbeResult.Offline(),
+            ["10.1.5.3"] = ProbeResult.Offline(),
+        });
+        var scanner = new NetworkScanner(probe);
+        var range = IpRangeParser.Parse("10.1.5.1 - 10.1.5.3");
+        var progressEvents = new List<ScanProgress>();
+
+        await scanner.ScanAsync(
+            range,
+            new ScanOptions(MaxConcurrency: 1, Timeout: TimeSpan.FromMilliseconds(50)),
+            CancellationToken.None,
+            new Progress<ScanProgress>(progressEvents.Add));
+
+        Assert.Equal(new[] { 1, 2, 3 }, progressEvents.Select(progress => progress.CompletedAddresses).ToArray());
+        Assert.All(progressEvents, progress => Assert.Equal(3, progress.TotalAddresses));
+        Assert.Equal(100, progressEvents[^1].PercentComplete);
+    }
+
+    [Fact]
     public async Task ScanAsync_enriches_online_results_with_mac_and_vendor()
     {
         var probe = new FakeNetworkProbe(new Dictionary<string, ProbeResult>

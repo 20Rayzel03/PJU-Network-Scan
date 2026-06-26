@@ -14,7 +14,8 @@ public sealed class NetworkScanner(
     public async Task<IReadOnlyList<ScanResult>> ScanAsync(
         IpRange range,
         ScanOptions? options = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<ScanProgress>? progress = null)
     {
         options ??= ScanOptions.Default;
         if (options.MaxConcurrency < 1)
@@ -23,6 +24,7 @@ public sealed class NetworkScanner(
         }
 
         var results = new ScanResult[range.AddressCount];
+        var completedAddresses = 0;
         using var semaphore = new SemaphoreSlim(options.MaxConcurrency, options.MaxConcurrency);
         var tasks = new List<Task>((int)Math.Min(range.AddressCount, 4096));
 
@@ -44,6 +46,8 @@ public sealed class NetworkScanner(
                 }
                 finally
                 {
+                    var completed = Interlocked.Increment(ref completedAddresses);
+                    progress?.Report(new ScanProgress(completed, results.Length));
                     semaphore.Release();
                 }
             }, cancellationToken));

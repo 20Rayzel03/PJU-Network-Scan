@@ -43,6 +43,12 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isScanning;
 
     [ObservableProperty]
+    private double _scanProgressPercent;
+
+    [ObservableProperty]
+    private string _scanProgressText = "0 %";
+
+    [ObservableProperty]
     private bool _showOfflineAddresses;
 
     [ObservableProperty]
@@ -72,6 +78,8 @@ public partial class MainWindowViewModel : ViewModelBase
         IsScanning = true;
         Results.Clear();
         _currentDisplayRows.Clear();
+        ScanProgressPercent = 0;
+        ScanProgressText = "0 %";
         ExportCommand.NotifyCanExecuteChanged();
         _scanCancellation = new CancellationTokenSource();
 
@@ -83,7 +91,8 @@ public partial class MainWindowViewModel : ViewModelBase
                 ? $"Scan running: {range.Start} - {range.End} ({range.AddressCount} addresses)"
                 : $"Scan läuft: {range.Start} - {range.End} ({range.AddressCount} Adressen)";
 
-            var scanResults = await _scanner.ScanAsync(range, ScanOptions.Default, _scanCancellation.Token);
+            var progress = new Progress<ScanProgress>(UpdateScanProgress);
+            var scanResults = await _scanner.ScanAsync(range, ScanOptions.Default, _scanCancellation.Token, progress);
             var displayRows = SubnetSummaryService.Summarize(range.Start, range.End, scanResults, ShowOfflineAddresses);
             _currentDisplayRows.Clear();
             _currentDisplayRows.AddRange(displayRows);
@@ -173,6 +182,12 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnShowOfflineAddressesChanged(bool value)
     {
         _ = SaveSettingsAsync();
+    }
+
+    private void UpdateScanProgress(ScanProgress progress)
+    {
+        ScanProgressPercent = progress.PercentComplete;
+        ScanProgressText = $"{progress.PercentComplete} %";
     }
 
     private async Task LoadSettingsAsync()

@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="720"
         x:Class="PjuNetworkTester.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/pju-logo.ico"
         Title="{Binding AppTitle}"
         Width="1100"
         Height="720"
@@ -18,13 +18,18 @@
     </Design.DataContext>
 
     <Grid RowDefinitions="Auto,Auto,*" Margin="22" RowSpacing="16">
-        <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Text="{Binding AppTitle}" FontSize="30" FontWeight="Bold" />
-            <TextBlock Text="IP-Bereiche scannen, Online-Geräte finden und nicht erreichbare /24-Netze zusammenfassen." Foreground="#94a3b8" />
-        </StackPanel>
+        <Grid Grid.Row="0" ColumnDefinitions="56,*" ColumnSpacing="14">
+            <Border Width="48" Height="48" CornerRadius="12" Background="#0f172a" BorderBrush="#1e3a5f" BorderThickness="1">
+                <Image Source="/Assets/pju-logo.png" Width="34" Height="34" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Grid.Column="1" Spacing="4">
+                <TextBlock Text="{Binding AppTitle}" FontSize="30" FontWeight="Bold" />
+                <TextBlock Text="IP-Bereiche scannen, Online-Geräte finden und nicht erreichbare /24-Netze zusammenfassen." Foreground="#94a3b8" />
+            </StackPanel>
+        </Grid>
 
         <Border Grid.Row="1" Classes="card">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="12">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="12">
                 <TextBox Grid.Column="0"
                          PlaceholderText="{Binding RangePlaceholder}"
                          Text="{Binding ScanInput}" />
@@ -39,7 +44,21 @@
                            Text="{Binding StatusText}"
                            Foreground="#38bdf8"
                            VerticalAlignment="Center" />
-                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="10">
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" ColumnDefinitions="*,70" ColumnSpacing="12">
+                    <ProgressBar Grid.Column="0"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding ScanProgressPercent}"
+                                 Height="8"
+                                 VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding ScanProgressText}"
+                               Foreground="#38bdf8"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center" />
+                </Grid>
+                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="10">
                     <TextBlock Text="{Binding LanguageText}" VerticalAlignment="Center" Foreground="#94a3b8" />
                     <ComboBox ItemsSource="{Binding LanguageOptions}"
                               SelectedItem="{Binding SelectedLanguage}"
