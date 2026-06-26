@@ -52,12 +52,47 @@ public sealed class NetworkScannerTests
             scanner.ScanAsync(range, new ScanOptions(MaxConcurrency: 4, Timeout: TimeSpan.FromSeconds(10)), cts.Token));
     }
 
+    [Fact]
+    public async Task ScanAsync_enriches_online_results_with_mac_and_vendor()
+    {
+        var probe = new FakeNetworkProbe(new Dictionary<string, ProbeResult>
+        {
+            ["10.1.5.1"] = ProbeResult.Online(2, "router.local"),
+            ["10.1.5.2"] = ProbeResult.Offline(),
+        });
+        var arpReader = new FakeArpTableReader(new Dictionary<IPAddress, string>
+        {
+            [IPAddress.Parse("10.1.5.1")] = "AA:BB:CC:11:22:33"
+        });
+        var vendorLookup = new OuiVendorLookup(new Dictionary<string, string>
+        {
+            ["AABBCC"] = "PJU Test Vendor"
+        });
+        var scanner = new NetworkScanner(probe, arpReader, vendorLookup);
+        var range = IpRangeParser.Parse("10.1.5.1 - 10.1.5.2");
+
+        var results = await scanner.ScanAsync(range, new ScanOptions(MaxConcurrency: 2, Timeout: TimeSpan.FromMilliseconds(50)), CancellationToken.None);
+
+        Assert.Equal("AA:BB:CC:11:22:33", results[0].MacAddress);
+        Assert.Equal("PJU Test Vendor", results[0].Vendor);
+        Assert.Null(results[1].MacAddress);
+        Assert.Null(results[1].Vendor);
+    }
+
     private sealed class FakeNetworkProbe(IReadOnlyDictionary<string, ProbeResult> results) : INetworkProbe
     {
         public Task<ProbeResult> ProbeAsync(IPAddress address, TimeSpan timeout, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(results.TryGetValue(address.ToString(), out var result) ? result : ProbeResult.Offline());
+        }
+    }
+
+    private sealed class FakeArpTableReader(IReadOnlyDictionary<IPAddress, string> entries) : IArpTableReader
+    {
+        public Task<IReadOnlyDictionary<IPAddress, string>> ReadAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(entries);
         }
     }
 

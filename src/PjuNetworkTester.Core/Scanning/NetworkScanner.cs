@@ -2,9 +2,14 @@ using PjuNetworkTester.Core.Networking;
 
 namespace PjuNetworkTester.Core.Scanning;
 
-public sealed class NetworkScanner(INetworkProbe? probe = null)
+public sealed class NetworkScanner(
+    INetworkProbe? probe = null,
+    IArpTableReader? arpTableReader = null,
+    OuiVendorLookup? vendorLookup = null)
 {
     private readonly INetworkProbe _probe = probe ?? new PingNetworkProbe();
+    private readonly IArpTableReader _arpTableReader = arpTableReader ?? new ArpTableReader();
+    private readonly OuiVendorLookup _vendorLookup = vendorLookup ?? new OuiVendorLookup(DefaultVendors.Vendors);
 
     public async Task<IReadOnlyList<ScanResult>> ScanAsync(
         IpRange range,
@@ -50,6 +55,42 @@ public sealed class NetworkScanner(INetworkProbe? probe = null)
         }
 
         await Task.WhenAll(tasks);
+        await EnrichWithMacAndVendorAsync(results, cancellationToken);
         return results;
+    }
+
+    private async Task EnrichWithMacAndVendorAsync(ScanResult[] results, CancellationToken cancellationToken)
+    {
+        if (!results.Any(result => result.IsOnline))
+        {
+            return;
+        }
+
+        IReadOnlyDictionary<System.Net.IPAddress, string> arpEntries;
+        try
+        {
+            arpEntries = await _arpTableReader.ReadAsync(cancellationToken);
+        }
+        catch
+        {
+            return;
+        }
+
+        for (var index = 0; index < results.Length; index++)
+        {
+            var result = results[index];
+            if (!result.IsOnline || !arpEntries.TryGetValue(result.Address, out var macAddress))
+            {
+                continue;
+            }
+
+            var normalizedMac = ArpTableParser.NormalizeMacAddress(macAddress);
+            var vendor = _vendorLookup.FindVendor(normalizedMac);
+            results[index] = result with
+            {
+                MacAddress = normalizedMac,
+                Vendor = vendor
+            };
+        }
     }
 }
