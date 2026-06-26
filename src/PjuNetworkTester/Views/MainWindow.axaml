@@ -24,17 +24,18 @@
         </StackPanel>
 
         <Border Grid.Row="1" Classes="card">
-            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="12">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="12">
                 <TextBox Grid.Column="0"
                          PlaceholderText="10.1.5.0/24 oder 10.1.2.1 - 10.1.25.255"
                          Text="{Binding ScanInput}" />
                 <Button Grid.Column="1" Content="Scan starten" Command="{Binding StartScanCommand}" />
                 <Button Grid.Column="2" Content="Stop" Command="{Binding StopScanCommand}" />
+                <Button Grid.Column="3" Content="Excel exportieren" Command="{Binding ExportCommand}" />
 
                 <CheckBox Grid.Row="1" Grid.Column="0"
                           Content="Offline-Adressen anzeigen"
                           IsChecked="{Binding ShowOfflineAddresses}" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
                            Text="{Binding StatusText}"
                            Foreground="#38bdf8"
                            VerticalAlignment="Center" />
