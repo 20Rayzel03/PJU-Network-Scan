@@ -1,0 +1,44 @@
+name: Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-windows-installer:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore PJU-Network-Scan.slnx
+
+      - name: Test
+        run: dotnet test PJU-Network-Scan.slnx --configuration Release --no-restore
+
+      - name: Publish Windows app
+        shell: pwsh
+        run: ./scripts/publish-windows.ps1
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup --yes
+
+      - name: Build installer
+        shell: pwsh
+        run: ./scripts/build-installer.ps1 -SkipPublish -InnoSetupCompiler "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PJU-Network-Tester-Setup
+          path: installer/output/PJU-Network-Tester-Setup.exe
